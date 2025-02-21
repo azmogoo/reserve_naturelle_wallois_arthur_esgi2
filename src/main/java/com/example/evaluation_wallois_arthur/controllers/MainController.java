@@ -18,6 +18,8 @@ import javafx.util.Duration;
 import javafx.scene.control.SelectionMode;
 import java.util.List;
 import javafx.event.ActionEvent;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class MainController {
     @FXML private ListView<Animal> listeAnimaux;
@@ -113,10 +115,12 @@ public class MainController {
                     setText(employe.toString());
                     if (employe.estEnRepos()) {
                         setStyle("-fx-text-fill: gray; -fx-background-color: #f0f0f0;");
-                        setDisable(true);
+                    } else if (employe.getNiveauSante() < 30) {
+                        setStyle("-fx-text-fill: #c0392b;"); // Rouge pour fatigue critique
+                    } else if (employe.getNiveauSante() < 50) {
+                        setStyle("-fx-text-fill: #e67e22;"); // Orange pour fatigue importante
                     } else {
                         setStyle("");
-                        setDisable(false);
                     }
                 }
             }
@@ -640,8 +644,8 @@ public class MainController {
     public String demanderNomBebe(String especeAnimal) {
         TextInputDialog dialog = new TextInputDialog("Bébé" + especeAnimal);
         dialog.setTitle("Nouvelle naissance !");
-        dialog.setHeaderText("Un bébé " + especeAnimal + " vient de naître !");
-        dialog.setContentText("Choisissez un nom pour le bébé :");
+        dialog.setHeaderText("🎉 Un bébé " + especeAnimal + " vient de naître !");
+        dialog.setContentText("Choisissez un nom pour le bébé " + especeAnimal + " :");
 
         // Style personnalisé pour la boîte de dialogue
         DialogPane dialogPane = dialog.getDialogPane();
@@ -649,6 +653,20 @@ public class MainController {
             getClass().getResource("/com/example/evaluation_wallois_arthur/styles/dialog.css").toExternalForm()
         );
         dialogPane.getStyleClass().add("custom-dialog");
+
+        // Personnalisation des boutons
+        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
+        okButton.setText("Nommer le bébé");
+        
+        Button cancelButton = (Button) dialogPane.lookupButton(ButtonType.CANCEL);
+        cancelButton.setText("Nom par défaut");
+        cancelButton.getStyleClass().add("cancel-button");
+
+        // Ajout d'une icône ou image décorative
+        ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/images/baby-animal.png")));
+        icon.setFitHeight(50);
+        icon.setFitWidth(50);
+        dialog.setGraphic(icon);
 
         Optional<String> result = dialog.showAndWait();
         return result.orElse("Bébé" + especeAnimal);

@@ -1,31 +1,77 @@
 @startuml
-object "lion1: Lion" as lion1 {
-  nom = "Simba"
-  age = 5
-  poids = 190.5
-  taille = 1.2
-  etatDeSante = "Bon"
+object "simulation: Simulation" as sim {
+    budget = 2500.0
+    jour = 1
 }
 
-object "savane1: Savane" as savane1 {
-  nom = "Savane Africaine"
-  taille = 1000.0
-  temperature = 28.5
+object "savaneAfricaine: Savane" as habitat1 {
+    nom = "Savane Africaine"
+    taille = GRAND
+    proprete = 95.0
+    prix = 600.0
 }
 
-object "soigneur1: SoigneurImpl" as soigneur1 {
-  nom = "Jean Dupont"
-  poste = "Soigneur principal"
-  salaire = 2500.0
+object "voliere1: Voliere" as habitat2 {
+    nom = "Grande Volière"
+    taille = MOYEN
+    proprete = 90.0
+    prix = 400.0
+    hauteur = 10.0
 }
 
-object "visiteur1: Visiteur" as visiteur1 {
-  nom = "Marie Martin"
-  age = 30
-  billet = "Adulte"
+object "simba: Lion" as animal1 {
+    nom = "Simba"
+    age = 5
+    poids = 190.5
+    taille = 1.2
+    etatDeSante = "Bon"
+    joursPassesDansEnclos = 10
 }
 
-savane1 -- lion1 : contient >
-soigneur1 -- lion1 : soigne >
-visiteur1 -- lion1 : observe >
+object "zazu: Aigle" as animal2 {
+    nom = "Zazu"
+    age = 3
+    poids = 4.2
+    taille = 0.6
+    etatDeSante = "Excellent"
+    joursPassesDansEnclos = 15
+}
+
+object "jean: SoigneurImpl" as employe1 {
+    nom = "Jean Dupont"
+    poste = "Soigneur"
+    salaire = 2500.0
+    niveauSante = 85.0
+    joursSansPause = 2
+}
+
+object "marie: Veterinaire" as employe2 {
+    nom = "Marie Martin"
+    poste = "Vétérinaire"
+    salaire = 3500.0
+    niveauSante = 95.0
+    joursSansPause = 1
+}
+
+object "stats: StatistiquesReserve" as stats {
+    nombreVisiteurs = 25
+    satisfactionVisiteurs = 92.5
+    revenuTotal = 1250.0
+    nombreIncidents = 0
+}
+
+' Relations
+sim *-- habitat1
+sim *-- habitat2
+sim *-- stats
+
+habitat1 o-- animal1
+habitat2 o-- animal2
+
+sim *-- employe1
+sim *-- employe2
+
+employe1 ..> animal1 : soigne
+employe2 ..> animal2 : soigne
+
 @enduml 

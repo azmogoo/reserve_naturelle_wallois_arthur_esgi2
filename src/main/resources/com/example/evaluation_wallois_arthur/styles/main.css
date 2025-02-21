@@ -16,7 +16,6 @@
     -fx-padding: 10 20;
     -fx-background-radius: 20;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);
 }
 
 .action-button-secondary {
@@ -40,7 +39,6 @@
 .action-button:hover, .action-button-secondary:hover, .action-button-warning:hover {
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 0);
 }
 
 .custom-list-view {

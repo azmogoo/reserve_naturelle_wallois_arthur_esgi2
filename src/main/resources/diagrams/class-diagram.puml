@@ -1,101 +1,156 @@
 @startuml
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
-abstract class Animal {
-  -nom: String
-  -age: int
-  -poids: double
-  -taille: double
-  -etatDeSante: String
-  +manger(): void
-  +dormir(): void
-  +seDeplacer(): void
-  +emettreSon(): void
+package "Animaux" {
+    abstract class Animal {
+        -nom: String
+        -age: int
+        -poids: double
+        -taille: double
+        -etatDeSante: String
+        -joursDepuisDerniereReproduction: int
+        -joursPassesDansEnclos: int
+        +manger(): void
+        +seReproduire(Animal): boolean
+        +estFertile(): boolean
+        +emettreSon(): void
+        +incrementerJoursPassesDansEnclos(): void
+    }
+
+    abstract class Mammifere {
+        +allaiter(): void
+    }
+
+    abstract class Reptile {
+        +pondreOeuf(): void
+    }
+
+    abstract class Oiseau {
+        +voler(): void
+    }
+
+    class Lion {
+        +rugir(): void
+    }
+
+    class Serpent {
+        +siffler(): void
+    }
+
+    class Aigle {
+        +crier(): void
+    }
 }
 
-abstract class Mammifere {
-  +allaiter(): void
+package "Habitats" {
+    abstract class Habitat {
+        -nom: String
+        -taille: TailleHabitat
+        -proprete: double
+        -prix: double
+        +ajouterAnimal(Animal): boolean
+        +nettoyer(): void
+        +peutAccueillirNouvelAnimal(): boolean
+    }
+
+    class Voliere {
+        -hauteur: double
+    }
+
+    class Aquarium {
+        -profondeur: double
+    }
+
+    class Savane {
+    }
 }
 
-abstract class Reptile {
-  +pondreOeuf(): void
+package "Personnel" {
+    interface Soigneur {
+        +nourrir(Animal): void
+        +soigner(Animal): void
+    }
+
+    interface Deplacable {
+        +voler(): void
+        +nager(): void
+        +marcher(): void
+    }
+
+    abstract class Employe {
+        -nom: String
+        -poste: String
+        -salaire: double
+        -enRepos: boolean
+        -joursDeReposRestants: int
+        -niveauSante: double
+        -joursSansPause: int
+        +effectuerTache(): void
+        +travaillerJournee(): void
+        +estTropFatigue(): boolean
+    }
+
+    class SoigneurImpl {
+    }
+
+    class Veterinaire {
+        +effectuerOperation(Animal): void
+    }
 }
 
-abstract class Oiseau {
-  +voler(): void
+package "Gestion" {
+    class Visiteur {
+        -nom: String
+        -age: int
+        -billet: String
+        -satisfaction: double
+        -nombreAnimauxObserves: int
+        +observerAnimal(Animal): void
+        +acheterBillet(): void
+    }
+
+    class StatistiquesReserve {
+        -nombreVisiteurs: int
+        -satisfactionVisiteurs: double
+        -revenuTotal: double
+        -nombreIncidents: int
+        +ajouterVisiteur(): void
+        +ajouterRecette(double): void
+        +genererRapport(): String
+    }
+
+    class Simulation {
+        -budget: double
+        -jour: int
+        +passerJournee(): void
+        +gererEmployes(): void
+        +gererVisiteurs(): void
+    }
 }
 
-abstract class Poisson {
-  +nager(): void
-}
-
-class Lion {
-  +rugir(): void
-}
-
-abstract class Habitat {
-  -nom: String
-  -taille: double
-  -temperature: double
-  +ajouterAnimal(Animal): void
-  +nettoyer(): void
-}
-
-class Voliere {
-}
-
-class Aquarium {
-}
-
-class Savane {
-}
-
-interface Soigneur {
-  +nourrir(Animal): void
-  +soigner(Animal): void
-}
-
-interface Deplacable {
-  +voler(): void
-  +nager(): void
-  +marcher(): void
-}
-
-interface Mangeable {
-  +etreMange(): void
-}
-
-class Employe {
-  -nom: String
-  -poste: String
-  -salaire: double
-  +effectuerTache(): void
-}
-
-class SoigneurImpl {
-}
-
-class Veterinaire {
-}
-
-class Visiteur {
-  -nom: String
-  -age: int
-  -billet: Billet
-  +observerAnimal(Animal): void
-  +acheterBillet(): void
-}
-
+' Relations entre classes
 Animal <|-- Mammifere
 Animal <|-- Reptile
 Animal <|-- Oiseau
-Animal <|-- Poisson
 Mammifere <|-- Lion
+Reptile <|-- Serpent
+Oiseau <|-- Aigle
 Habitat <|-- Voliere
 Habitat <|-- Aquarium
 Habitat <|-- Savane
 Employe <|-- SoigneurImpl
 Employe <|-- Veterinaire
 SoigneurImpl ..|> Soigneur
+Veterinaire ..|> Soigneur
 Animal ..|> Deplacable
+
+' Relations de composition et d'agrégation
+Habitat "1" *-- "*" Animal : contient >
+Simulation "1" *-- "*" Animal : gère >
+Simulation "1" *-- "*" Habitat : gère >
+Simulation "1" *-- "*" Employe : gère >
+Simulation "1" *-- "*" Visiteur : accueille >
+Simulation "1" *-- "1" StatistiquesReserve : utilise >
+
 @enduml 

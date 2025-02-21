@@ -1,20 +1,17 @@
 package com.example.evaluation_wallois_arthur.models;
 
 import com.example.evaluation_wallois_arthur.interfaces.Deplacable;
-import com.example.evaluation_wallois_arthur.interfaces.Reproductible;
-import com.example.evaluation_wallois_arthur.interfaces.Mangeable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public abstract class Animal implements Deplacable, Reproductible, Mangeable {
+public abstract class Animal implements Deplacable {
     protected String nom;
     protected int age;
     protected double poids;
     protected double taille;
     protected String etatDeSante;
-    protected double niveauFaim;
     protected int joursDepuisDerniereReproduction;
     protected int joursPassesDansEnclos;
     protected static final int AGE_MINIMUM_REPRODUCTION = 3;
@@ -33,33 +30,16 @@ public abstract class Animal implements Deplacable, Reproductible, Mangeable {
         this.poids = poids;
         this.taille = taille;
         this.etatDeSante = "Bon";
-        this.niveauFaim = 100.0; // 100 = rassasié, 0 = affamé
         this.joursDepuisDerniereReproduction = DELAI_ENTRE_REPRODUCTIONS;
         this.joursPassesDansEnclos = 0;
     }
 
     public void manger() {
         System.out.println(nom + " est en train de manger");
-        niveauFaim = 100.0;
-    }
-
-    public void dormir() {
-        System.out.println(nom + " dort paisiblement");
-        // Récupération d'un peu de santé pendant le sommeil
-        if (!"Bon".equals(etatDeSante)) {
-            etatDeSante = "Fatigué";
-        }
-    }
-
-    public void seDeplacer() {
-        System.out.println(nom + " se déplace");
-        // Le déplacement consomme de l'énergie
-        niveauFaim -= 10;
     }
 
     public abstract void emettreSon();
 
-    @Override
     public boolean seReproduire(Animal partenaire) {
         if (peutSeReproduireAvec(partenaire)) {
             joursDepuisDerniereReproduction = 0;
@@ -68,7 +48,6 @@ public abstract class Animal implements Deplacable, Reproductible, Mangeable {
         return false;
     }
 
-    @Override
     public boolean estFertile() {
         return age >= AGE_MINIMUM_REPRODUCTION && 
                joursDepuisDerniereReproduction >= DELAI_ENTRE_REPRODUCTIONS &&
@@ -76,7 +55,6 @@ public abstract class Animal implements Deplacable, Reproductible, Mangeable {
                "Bon".equals(etatDeSante);
     }
 
-    @Override
     public boolean peutSeReproduireAvec(Animal partenaire) {
         return partenaire != null && 
                this.getClass() == partenaire.getClass() &&
@@ -85,17 +63,14 @@ public abstract class Animal implements Deplacable, Reproductible, Mangeable {
                partenaire.estFertile();
     }
 
-    @Override
     public int getAgeMinimumReproduction() {
         return AGE_MINIMUM_REPRODUCTION;
     }
 
-    @Override
     public int getDelaiEntreReproductions() {
         return DELAI_ENTRE_REPRODUCTIONS;
     }
 
-    @Override
     public void incrementerJoursDepuisReproduction() {
         if (joursDepuisDerniereReproduction < DELAI_ENTRE_REPRODUCTIONS) {
             joursDepuisDerniereReproduction++;
@@ -114,7 +89,7 @@ public abstract class Animal implements Deplacable, Reproductible, Mangeable {
         return joursPassesDansEnclos;
     }
 
-    // Getters et setters
+    // Getters et setters essentiels
     @JsonProperty("nom")
     public String getNom() { return nom; }
     
@@ -123,7 +98,6 @@ public abstract class Animal implements Deplacable, Reproductible, Mangeable {
     
     public void setAge(int age) { 
         this.age = age;
-        // L'animal devient plus fragile avec l'âge
         if (age > 20) {
             etatDeSante = "Fragile";
         }
@@ -140,24 +114,13 @@ public abstract class Animal implements Deplacable, Reproductible, Mangeable {
     
     public void setEtatDeSante(String etatDeSante) { this.etatDeSante = etatDeSante; }
 
-    @JsonProperty("niveauFaim")
-    public double getNiveauFaim() { return niveauFaim; }
-
-    public void setNiveauFaim(double niveauFaim) { 
-        this.niveauFaim = niveauFaim;
-        if (niveauFaim < 20) {
-            etatDeSante = "Affamé";
-        }
-    }
-
     @Override
     public String toString() {
-        return String.format("%s %s - %d ans - %.1f kg - État: %s - Faim: %.1f%%", 
+        return String.format("%s %s - %d ans - %.1f kg - État: %s", 
             getClass().getSimpleName(),
             nom, 
             age, 
             poids, 
-            etatDeSante,
-            niveauFaim);
+            etatDeSante);
     }
 } 

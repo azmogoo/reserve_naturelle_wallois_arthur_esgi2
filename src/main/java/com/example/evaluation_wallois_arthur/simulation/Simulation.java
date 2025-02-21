@@ -8,8 +8,6 @@ import com.example.evaluation_wallois_arthur.models.employes.Veterinaire;
 import com.example.evaluation_wallois_arthur.models.Visiteur;
 import com.example.evaluation_wallois_arthur.models.StatistiquesReserve;
 import com.example.evaluation_wallois_arthur.models.Incident;
-import com.example.evaluation_wallois_arthur.interfaces.Reproductible;
-import com.example.evaluation_wallois_arthur.interfaces.Mangeable;
 import com.example.evaluation_wallois_arthur.models.animaux.Lion;
 import com.example.evaluation_wallois_arthur.models.animaux.Aigle;
 import com.example.evaluation_wallois_arthur.models.animaux.Serpent;
@@ -44,295 +42,218 @@ public class Simulation {
     }
 
     private int calculerNombreVisiteurs() {
-        if (animaux.isEmpty()) {
-            return 0; // Pas de visiteurs s'il n'y a pas d'animaux
-        }
+        if (animaux.isEmpty()) return 0;
 
-        // Base de visiteurs en fonction du nombre d'animaux (2-5 visiteurs par animal)
         int baseVisiteurs = animaux.size() * (2 + random.nextInt(4));
-
-        // Facteur de satisfaction (0.5 à 1.5)
-        double facteurSatisfaction = (statistiques.getSatisfactionVisiteurs() / 100.0) * 1.5;
-        if (facteurSatisfaction < 0.5) facteurSatisfaction = 0.5;
-
-        // Facteur état des animaux
+        double facteurSatisfaction = Math.max(0.5, (statistiques.getSatisfactionVisiteurs() / 100.0) * 1.5);
         double facteurSanteAnimaux = calculerFacteurSanteAnimaux();
-
-        // Facteur état des enclos
         double facteurPropreteEnclos = calculerFacteurPropreteEnclos();
 
-        // Calcul final avec tous les facteurs
-        int nombreVisiteurs = (int) (baseVisiteurs * facteurSatisfaction * facteurSanteAnimaux * facteurPropreteEnclos);
-        
-        // Minimum 1 visiteur si il y a des animaux, maximum 30 visiteurs par jour
-        return Math.min(Math.max(nombreVisiteurs, 1), 30);
+        return Math.min(Math.max((int)(baseVisiteurs * facteurSatisfaction * facteurSanteAnimaux * facteurPropreteEnclos), 1), 30);
     }
 
     private double calculerFacteurSanteAnimaux() {
         if (animaux.isEmpty()) return 0.5;
-
-        int animauxEnBonneSante = 0;
-        for (Animal animal : animaux) {
-            if ("Bon".equals(animal.getEtatDeSante()) || "Excellent".equals(animal.getEtatDeSante())) {
-                animauxEnBonneSante++;
-            }
-        }
-
-        double tauxSante = (double) animauxEnBonneSante / animaux.size();
-        return 0.5 + (tauxSante * 0.5); // Entre 0.5 et 1.0
+        long animauxEnBonneSante = animaux.stream()
+            .filter(a -> "Bon".equals(a.getEtatDeSante()) || "Excellent".equals(a.getEtatDeSante()))
+            .count();
+        return 0.5 + ((double) animauxEnBonneSante / animaux.size() * 0.5);
     }
 
     private double calculerFacteurPropreteEnclos() {
         if (habitats.isEmpty()) return 0.5;
-
-        double propreteMoyenne = 0;
-        for (Habitat habitat : habitats) {
-            propreteMoyenne += habitat.getProprete();
-        }
-        propreteMoyenne /= habitats.size();
-
-        return 0.5 + ((propreteMoyenne / 100.0) * 0.5); // Entre 0.5 et 1.0
+        double propreteMoyenne = habitats.stream()
+            .mapToDouble(Habitat::getProprete)
+            .average()
+            .orElse(0.0);
+        return 0.5 + (propreteMoyenne / 100.0 * 0.5);
     }
 
     private void mettreAJourSatisfactionVisiteurs() {
-        for (Visiteur visiteur : visiteurs) {
-            // Impact de la santé des animaux
-            double facteurSante = calculerFacteurSanteAnimaux();
-            
-            // Impact de la propreté des enclos
-            double facteurProprete = calculerFacteurPropreteEnclos();
-            
-            // Calcul de la nouvelle satisfaction
-            double nouvelleSatisfaction = visiteur.getSatisfaction();
-            nouvelleSatisfaction *= (facteurSante + facteurProprete) / 2;
-            
-            // Limiter entre 0 et 100
-            nouvelleSatisfaction = Math.min(Math.max(nouvelleSatisfaction, 0), 100);
-            
-            // Mise à jour des statistiques
+        double facteurGlobal = (calculerFacteurSanteAnimaux() + calculerFacteurPropreteEnclos()) / 2;
+        visiteurs.forEach(visiteur -> {
+            double nouvelleSatisfaction = Math.min(Math.max(visiteur.getSatisfaction() * facteurGlobal, 0), 100);
             statistiques.updateSatisfactionVisiteurs(nouvelleSatisfaction);
-        }
+        });
     }
 
     private void ajouterInteractionAnimale(String nomVisiteur, Animal animal) {
-        if (random.nextInt(5) == 0) { // Une chance sur 5
-            String interaction = "";
-            
-            if (animal instanceof Lion) {
-                interaction = nomVisiteur + " sursaute ! " + animal.getNom() + " rugit puissamment dans sa direction !";
-                // Baisse légère de satisfaction
-                statistiques.updateSatisfactionVisiteurs(statistiques.getSatisfactionVisiteurs() * 0.95);
-            } 
-            else if (animal instanceof Aigle) {
-                interaction = "Oups ! " + animal.getNom() + " fait un petit cadeau sur la tête de " + nomVisiteur + " !";
-                // Baisse modérée de satisfaction
-                statistiques.updateSatisfactionVisiteurs(statistiques.getSatisfactionVisiteurs() * 0.90);
-            }
-            else if (animal instanceof Serpent) {
-                interaction = nomVisiteur + " frissonne quand " + animal.getNom() + " tire la langue dans sa direction !";
-                // Légère baisse de satisfaction
-                statistiques.updateSatisfactionVisiteurs(statistiques.getSatisfactionVisiteurs() * 0.97);
-            }
-            
-            if (!interaction.isEmpty()) {
-                ajouterActiviteVisiteur(interaction);
-            }
+        if (random.nextInt(5) != 0) return;
+
+        String interaction = creerInteractionAnimale(nomVisiteur, animal);
+        if (!interaction.isEmpty()) {
+            ajouterActiviteVisiteur(interaction);
         }
+    }
+
+    private String creerInteractionAnimale(String nomVisiteur, Animal animal) {
+        if (animal instanceof Lion) {
+            statistiques.updateSatisfactionVisiteurs(statistiques.getSatisfactionVisiteurs() * 0.95);
+            return String.format("%s sursaute ! %s rugit puissamment dans sa direction !", nomVisiteur, animal.getNom());
+        } 
+        if (animal instanceof Aigle) {
+            statistiques.updateSatisfactionVisiteurs(statistiques.getSatisfactionVisiteurs() * 0.90);
+            return String.format("Oups ! %s fait un petit cadeau sur la tête de %s !", animal.getNom(), nomVisiteur);
+        }
+        if (animal instanceof Serpent) {
+            statistiques.updateSatisfactionVisiteurs(statistiques.getSatisfactionVisiteurs() * 0.97);
+            return String.format("%s frissonne quand %s tire la langue dans sa direction !", nomVisiteur, animal.getNom());
+        }
+        return "";
     }
 
     private void verifierReproductions() {
-        for (Habitat habitat : habitats) {
-            List<Animal> animauxHabitat = habitat.getAnimaux();
-            if (animauxHabitat.size() >= 2 && habitat.peutAccueillirNouvelAnimal()) {
-                // Vérifier les paires d'animaux de même espèce
-                for (int i = 0; i < animauxHabitat.size() - 1; i++) {
-                    for (int j = i + 1; j < animauxHabitat.size(); j++) {
-                        Animal animal1 = animauxHabitat.get(i);
-                        Animal animal2 = animauxHabitat.get(j);
-                        
-                        if (animal1.getClass() == animal2.getClass() && 
-                            animal1 instanceof Reproductible && 
-                            animal2 instanceof Reproductible) {
-                            
-                            // Vérifier que les deux animaux ont passé assez de temps dans l'enclos
-                            if (animal1.getJoursPassesDansEnclos() >= Animal.JOURS_MINIMUM_DANS_ENCLOS &&
-                                animal2.getJoursPassesDansEnclos() >= Animal.JOURS_MINIMUM_DANS_ENCLOS) {
-                                
-                                Reproductible parent1 = (Reproductible) animal1;
-                                Reproductible parent2 = (Reproductible) animal2;
-                                
-                                if (parent1.peutSeReproduireAvec(animal2) && 
-                                    parent2.peutSeReproduireAvec(animal1) &&
-                                    parent1.estFertile() && parent2.estFertile()) {
-                                    
-                                    // Création du bébé en fonction du type des parents
-                                    Animal bebe = null;
-                                    String nomBebe = demanderNomBebe(animal1.getClass().getSimpleName());
-                                    
-                                    if (animal1 instanceof Lion) {
-                                        bebe = new Lion(nomBebe, 0, 10.0, 0.3); // Petit lion
-                                    } else if (animal1 instanceof Aigle) {
-                                        bebe = new Aigle(nomBebe, 0, 0.5, 0.2); // Petit aigle
-                                    } else if (animal1 instanceof Serpent) {
-                                        bebe = new Serpent(nomBebe, 0, 0.3, 0.1); // Petit serpent
-                                    }
-                                    
-                                    if (bebe != null) {
-                                        habitat.ajouterAnimal(bebe);
-                                        animaux.add(bebe);
-                                        statistiques.enregistrerNaissance(bebe.getClass().getSimpleName());
-                                        ajouterActiviteVisiteur("NAISSANCE : Un bébé " + bebe.getClass().getSimpleName() + 
-                                                              " nommé " + nomBebe + " est né !");
-                                        
-                                        // Réinitialiser le compteur de reproduction pour les deux parents
-                                        parent1.seReproduire(animal2);
-                                        parent2.seReproduire(animal1);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        habitats.stream()
+            .filter(h -> h.getAnimaux().size() >= 2 && h.peutAccueillirNouvelAnimal())
+            .forEach(this::verifierReproductionsDansHabitat);
+    }
+
+    private void verifierReproductionsDansHabitat(Habitat habitat) {
+        List<Animal> animauxHabitat = habitat.getAnimaux();
+        for (int i = 0; i < animauxHabitat.size() - 1; i++) {
+            for (int j = i + 1; j < animauxHabitat.size(); j++) {
+                tenterReproduction(animauxHabitat.get(i), animauxHabitat.get(j), habitat);
             }
         }
     }
 
+    private void tenterReproduction(Animal animal1, Animal animal2, Habitat habitat) {
+        if (!peuventSeReproduire(animal1, animal2)) return;
+
+        Animal bebe = creerBebe(animal1);
+        if (bebe != null) {
+            ajouterNouveauNe(bebe, habitat, animal1, animal2);
+        }
+    }
+
+    private boolean peuventSeReproduire(Animal animal1, Animal animal2) {
+        return animal1.getClass() == animal2.getClass() &&
+               animal1.getJoursPassesDansEnclos() >= Animal.JOURS_MINIMUM_DANS_ENCLOS &&
+               animal2.getJoursPassesDansEnclos() >= Animal.JOURS_MINIMUM_DANS_ENCLOS &&
+               animal1.peutSeReproduireAvec(animal2);
+    }
+
+    private Animal creerBebe(Animal parent) {
+        String nomBebe = demanderNomBebe(parent.getClass().getSimpleName());
+        if (parent instanceof Lion) return new Lion(nomBebe, 0, 10.0, 0.3);
+        if (parent instanceof Aigle) return new Aigle(nomBebe, 0, 0.5, 0.2);
+        if (parent instanceof Serpent) return new Serpent(nomBebe, 0, 0.3, 0.1);
+        return null;
+    }
+
+    private void ajouterNouveauNe(Animal bebe, Habitat habitat, Animal parent1, Animal parent2) {
+        habitat.ajouterAnimal(bebe);
+        animaux.add(bebe);
+        statistiques.enregistrerNaissance(bebe.getClass().getSimpleName());
+        ajouterActiviteVisiteur(String.format("NAISSANCE : Un bébé %s nommé %s est né !",
+            bebe.getClass().getSimpleName(), bebe.getNom()));
+        parent1.seReproduire(parent2);
+        parent2.seReproduire(parent1);
+    }
+
     private String demanderNomBebe(String especeAnimal) {
-        // Cette méthode sera appelée par le contrôleur pour afficher une boîte de dialogue
-        // Pour l'instant, on retourne un nom par défaut
         return "Bébé" + especeAnimal + (animaux.size() + 1);
     }
 
     public void passerJournee() {
         jour++;
-        System.out.println("\n=== Jour " + jour + " ===");
-        
-        // Événements aléatoires
-        for (Animal animal : animaux) {
-            if (random.nextDouble() < 0.1) {
-                animal.setEtatDeSante("Malade");
-                System.out.println(animal.getNom() + " est tombé malade !");
-            }
-            // Incrémenter le compteur de jours depuis la dernière reproduction
-            if (animal instanceof Reproductible) {
-                ((Reproductible) animal).incrementerJoursDepuisReproduction();
-            }
-            // Incrémenter le compteur de jours dans l'enclos
-            animal.incrementerJoursPassesDansEnclos();
-        }
-
-        // Vérifier les reproductions possibles
+        gererEvenementsQuotidiens();
         verifierReproductions();
-
-        // Fatigue des employés
-        for (Employe employe : employes) {
-            employe.effectuerTache();
-        }
-
-        // Mise à jour de la satisfaction des visiteurs existants
+        gererEmployes();
         mettreAJourSatisfactionVisiteurs();
-
-        // Génération de nouveaux visiteurs en fonction des facteurs
-        int nombreNouveauxVisiteurs = calculerNombreVisiteurs();
-        for (int i = 0; i < nombreNouveauxVisiteurs; i++) {
-            String nomVisiteur = "Visiteur" + (visiteurs.size() + 1);
-            int ageVisiteur = random.nextInt(70) + 5; // Âge entre 5 et 75 ans
-            Visiteur nouveauVisiteur = new Visiteur(nomVisiteur, ageVisiteur);
-            nouveauVisiteur.acheterBillet();
-            
-            // Ajouter le revenu du billet aux statistiques
-            double prixBillet = nouveauVisiteur.calculerPrixBillet();
-            budget += prixBillet;
-            statistiques.ajouterRecette(prixBillet);
-            
-            // Observer des animaux aléatoires
-            if (!animaux.isEmpty()) {
-                int nombreObservations = random.nextInt(3) + 1; // 1 à 3 observations
-                for (int j = 0; j < nombreObservations; j++) {
-                    Animal animalObserve = animaux.get(random.nextInt(animaux.size()));
-                    nouveauVisiteur.observerAnimal(animalObserve);
-                    ajouterActiviteVisiteur(nomVisiteur + " observe " + animalObserve.getNom());
-                    
-                    // Ajouter une possible interaction amusante
-                    ajouterInteractionAnimale(nomVisiteur, animalObserve);
-                }
-            }
-            
-            visiteurs.add(nouveauVisiteur);
-            statistiques.ajouterVisiteur();
-        }
-
-        // Mise à jour des statistiques
+        gererNouveauxVisiteurs();
         statistiques.incrementerJour();
         nourrirAnimaux();
     }
 
-    public void nourrirAnimaux() {
-        for (Animal animal : animaux) {
-            if (animal instanceof Mangeable) {
-                ((Mangeable) animal).manger();
+    private void gererEvenementsQuotidiens() {
+        animaux.forEach(animal -> {
+            if (random.nextDouble() < 0.1) {
+                animal.setEtatDeSante("Malade");
+            }
+            animal.incrementerJoursDepuisReproduction();
+            animal.incrementerJoursPassesDansEnclos();
+        });
+    }
+
+    private void gererEmployes() {
+        Iterator<Employe> employeIterator = employes.iterator();
+        while (employeIterator.hasNext()) {
+            Employe employe = employeIterator.next();
+            if (employe.estEnRepos()) {
+                employe.diminuerJoursDeRepos();
+            } else {
+                employe.travaillerJournee();
+                employe.effectuerTache();
+                if (employe.estTropFatigue()) {
+                    employeIterator.remove();
+                    statistiques.ajouterIncident();
+                }
             }
         }
     }
 
+    private void gererNouveauxVisiteurs() {
+        int nombreNouveauxVisiteurs = calculerNombreVisiteurs();
+        for (int i = 0; i < nombreNouveauxVisiteurs; i++) {
+            ajouterNouveauVisiteur();
+        }
+    }
+
+    private void ajouterNouveauVisiteur() {
+        String nomVisiteur = "Visiteur" + (visiteurs.size() + 1);
+        int ageVisiteur = random.nextInt(70) + 5;
+        Visiteur nouveauVisiteur = new Visiteur(nomVisiteur, ageVisiteur);
+        nouveauVisiteur.acheterBillet();
+        
+        double prixBillet = nouveauVisiteur.calculerPrixBillet();
+        budget += prixBillet;
+        statistiques.ajouterRecette(prixBillet);
+        
+        if (!animaux.isEmpty()) {
+            faireObserverAnimaux(nouveauVisiteur);
+        }
+        
+        visiteurs.add(nouveauVisiteur);
+        statistiques.ajouterVisiteur();
+    }
+
+    private void faireObserverAnimaux(Visiteur visiteur) {
+        int nombreObservations = random.nextInt(3) + 1;
+        for (int j = 0; j < nombreObservations; j++) {
+            Animal animalObserve = animaux.get(random.nextInt(animaux.size()));
+            visiteur.observerAnimal(animalObserve);
+            ajouterActiviteVisiteur(visiteur.getNom() + " observe " + animalObserve.getNom());
+            ajouterInteractionAnimale(visiteur.getNom(), animalObserve);
+        }
+    }
+
+    public void nourrirAnimaux() {
+        animaux.forEach(Animal::manger);
+    }
+
     // Getters
-    public List<Animal> getAnimaux() {
-        return animaux;
-    }
+    public List<Animal> getAnimaux() { return animaux; }
+    public List<Habitat> getHabitats() { return habitats; }
+    public List<Employe> getEmployes() { return employes; }
+    public List<Visiteur> getVisiteurs() { return visiteurs; }
+    public StatistiquesReserve getStatistiques() { return statistiques; }
+    public List<String> getActivitesVisiteurs() { return activitesVisiteurs; }
+    public int getJour() { return jour; }
+    public double getBudget() { return budget; }
 
-    public List<Habitat> getHabitats() {
-        return habitats;
-    }
-
-    public List<Employe> getEmployes() {
-        return employes;
-    }
-
-    public List<Visiteur> getVisiteurs() {
-        return visiteurs;
-    }
-
-    public StatistiquesReserve getStatistiques() {
-        return statistiques;
-    }
-
-    public List<String> getActivitesVisiteurs() {
-        return activitesVisiteurs;
-    }
-
-    public int getJour() {
-        return jour;
-    }
-
-    public double getBudget() {
-        return budget;
-    }
-
-    // Méthodes pour ajouter des éléments à la simulation
-    public boolean ajouterAnimal(Animal animal) {
-        return animaux.add(animal);
-    }
+    // Méthodes d'ajout
+    public boolean ajouterAnimal(Animal animal) { return animaux.add(animal); }
 
     public boolean ajouterHabitat(Habitat habitat) {
-        if (budget >= habitat.getPrix()) {
-            if (habitats.add(habitat)) {
-                budget -= habitat.getPrix();
-                System.out.println("Habitat construit pour " + habitat.getPrix() + "€");
-                return true;
-            }
+        if (budget >= habitat.getPrix() && habitats.add(habitat)) {
+            budget -= habitat.getPrix();
+            return true;
         }
         return false;
     }
 
-    public boolean ajouterEmploye(Employe employe) {
-        return employes.add(employe);
-    }
-
-    public void ajouterVisiteur(Visiteur visiteur) {
-        visiteurs.add(visiteur);
-    }
-
-    public void ajouterActiviteVisiteur(String activite) {
-        activitesVisiteurs.add(activite);
-    }
+    public boolean ajouterEmploye(Employe employe) { return employes.add(employe); }
+    public void ajouterVisiteur(Visiteur visiteur) { visiteurs.add(visiteur); }
+    public void ajouterActiviteVisiteur(String activite) { activitesVisiteurs.add(activite); }
 } 
