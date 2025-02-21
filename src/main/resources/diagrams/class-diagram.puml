@@ -1,0 +1,101 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+abstract class Animal {
+  -nom: String
+  -age: int
+  -poids: double
+  -taille: double
+  -etatDeSante: String
+  +manger(): void
+  +dormir(): void
+  +seDeplacer(): void
+  +emettreSon(): void
+}
+
+abstract class Mammifere {
+  +allaiter(): void
+}
+
+abstract class Reptile {
+  +pondreOeuf(): void
+}
+
+abstract class Oiseau {
+  +voler(): void
+}
+
+abstract class Poisson {
+  +nager(): void
+}
+
+class Lion {
+  +rugir(): void
+}
+
+abstract class Habitat {
+  -nom: String
+  -taille: double
+  -temperature: double
+  +ajouterAnimal(Animal): void
+  +nettoyer(): void
+}
+
+class Voliere {
+}
+
+class Aquarium {
+}
+
+class Savane {
+}
+
+interface Soigneur {
+  +nourrir(Animal): void
+  +soigner(Animal): void
+}
+
+interface Deplacable {
+  +voler(): void
+  +nager(): void
+  +marcher(): void
+}
+
+interface Mangeable {
+  +etreMange(): void
+}
+
+class Employe {
+  -nom: String
+  -poste: String
+  -salaire: double
+  +effectuerTache(): void
+}
+
+class SoigneurImpl {
+}
+
+class Veterinaire {
+}
+
+class Visiteur {
+  -nom: String
+  -age: int
+  -billet: Billet
+  +observerAnimal(Animal): void
+  +acheterBillet(): void
+}
+
+Animal <|-- Mammifere
+Animal <|-- Reptile
+Animal <|-- Oiseau
+Animal <|-- Poisson
+Mammifere <|-- Lion
+Habitat <|-- Voliere
+Habitat <|-- Aquarium
+Habitat <|-- Savane
+Employe <|-- SoigneurImpl
+Employe <|-- Veterinaire
+SoigneurImpl ..|> Soigneur
+Animal ..|> Deplacable
+@enduml 

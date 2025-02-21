@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.effect.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.evaluation_wallois_arthur.controllers.MainController">
+    <!-- Le conteneur pour l'image de fond sera ajouté en Java -->
+    <BorderPane fx:id="mainContainer" style="-fx-background-color: linear-gradient(to bottom, rgba(44, 62, 80, 0.9), rgba(52, 152, 219, 0.9));">
+        <top>
+            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 10;">
+                <Label text="Budget:" style="-fx-font-size: 18; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Label fx:id="labelBudget" style="-fx-font-size: 18; -fx-text-fill: #2ecc71; -fx-font-weight: bold;"/>
+            </HBox>
+        </top>
+        <center>
+            <VBox spacing="20" alignment="CENTER">
+                <!-- Titre principal -->
+                <HBox spacing="10" alignment="CENTER" style="-fx-padding: 20;">
+                    <Label text="Réserve Naturelle" 
+                           style="-fx-font-size: 40; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, black, 10, 0, 0, 0);"/>
+                </HBox>
+
+                <!-- Contenu principal -->
+                <TabPane VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;" 
+                         styleClass="floating-tabs">
+                    <Tab text="Animaux" closable="false">
+                        <VBox spacing="15" styleClass="content-panel">
+                            <HBox spacing="15" alignment="CENTER">
+                                <Button text="Ajouter Animal" onAction="#ajouterAnimal" 
+                                        styleClass="action-button"/>
+                                <Button text="Soigner" onAction="#soignerAnimal"
+                                        styleClass="action-button-secondary"/>
+                                <Button text="Nourrir" onAction="#nourrirAnimaux" styleClass="action-button-secondary"/>
+                            </HBox>
+                            <ListView fx:id="listeAnimaux" VBox.vgrow="ALWAYS" 
+                                     styleClass="custom-list-view"/>
+                        </VBox>
+                    </Tab>
+
+                    <Tab text="Habitats" closable="false">
+                        <VBox spacing="15" styleClass="content-panel">
+                            <HBox spacing="15" alignment="CENTER">
+                                <Button text="Ajouter Habitat" onAction="#ajouterHabitat"
+                                        styleClass="action-button"/>
+                                <Button text="Nettoyer" onAction="#nettoyerHabitat"
+                                        styleClass="action-button-secondary"/>
+                            </HBox>
+                            <ListView fx:id="listeHabitats" VBox.vgrow="ALWAYS"
+                                     styleClass="custom-list-view"/>
+                        </VBox>
+                    </Tab>
+
+                    <Tab text="Employés" closable="false">
+                        <VBox spacing="15" styleClass="content-panel">
+                            <HBox spacing="15" alignment="CENTER">
+                                <Button text="Ajouter Employé" onAction="#ajouterEmploye"
+                                        styleClass="action-button"/>
+                                <Button text="Licencier" onAction="#licencierEmploye"
+                                        styleClass="action-button-warning"/>
+                                <Button text="Mettre au repos" onAction="#faireReposerEmploye" styleClass="action-button-secondary"/>
+                            </HBox>
+                            <ListView fx:id="listeEmployes" VBox.vgrow="ALWAYS"
+                                     styleClass="custom-list-view"/>
+                        </VBox>
+                    </Tab>
+
+                    <Tab text="Actualités Visiteurs" closable="false">
+                        <VBox spacing="15" styleClass="content-panel">
+                            <GridPane hgap="10" vgap="10">
+                                <Label text="Nombre total de visiteurs:" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                                       style="-fx-font-weight: bold;"/>
+                                <Label fx:id="labelNombreVisiteurs" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                                
+                                <Label text="Satisfaction moyenne:" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                                       style="-fx-font-weight: bold;"/>
+                                <Label fx:id="labelSatisfactionMoyenne" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                
+                                <Label text="Revenus billetterie:" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                                       style="-fx-font-weight: bold;"/>
+                                <Label fx:id="labelRevenusBilletterie" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            </GridPane>
+                            
+                            <Label text="Activités des visiteurs:" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="activitesVisiteurs" VBox.vgrow="ALWAYS" 
+                                     editable="false" styleClass="custom-text-area"
+                                     style="-fx-font-family: 'Segoe UI'; -fx-font-size: 12;"/>
+                        </VBox>
+                    </Tab>
+
+                    <Tab text="Simulation" closable="false">
+                        <VBox spacing="15" styleClass="content-panel">
+                            <HBox spacing="15" alignment="CENTER">
+                                <Button text="Passer une journée" onAction="#passerJournee"
+                                        styleClass="action-button-warning"/>
+                                <Button text="Sauvegarder" onAction="#sauvegarderSimulation"
+                                        styleClass="action-button"/>
+                                <Button text="Charger" onAction="#chargerSimulation"
+                                        styleClass="action-button-secondary"/>
+                            </HBox>
+                            <TextArea fx:id="journalSimulation" VBox.vgrow="ALWAYS" 
+                                     editable="false" styleClass="custom-text-area"/>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+
+                <!-- Status bar -->
+                <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+                    <Label fx:id="statusLabel" 
+                           style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                </HBox>
+            </VBox>
+        </center>
+    </BorderPane>
+</StackPane> 

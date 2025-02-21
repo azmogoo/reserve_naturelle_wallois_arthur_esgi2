@@ -1,0 +1,21 @@
+{
+  "jour" : 2,
+  "animaux" : [ "java.util.ArrayList", [ {
+    "@class" : "com.example.evaluation_wallois_arthur.models.animaux.Lion",
+    "nom" : "gfezsg²",
+    "age" : 15,
+    "poids" : 15.0,
+    "taille" : 15.0,
+    "etatDeSante" : "Bon"
+  } ] ],
+  "habitats" : [ "java.util.ArrayList", [ [ "com.example.evaluation_wallois_arthur.models.habitats.Savane", {
+    "nom" : "dsq",
+    "taille" : 188188.0,
+    "temperature" : 28.5,
+    "animaux" : [ "java.util.ArrayList", [ ] ]
+  } ] ] ],
+  "employes" : [ "java.util.ArrayList", [ ] ],
+  "budget" : 100130.0,
+  "nombreVisiteurs" : 14,
+  "rapportJournalier" : "=== Jour 2 ===\nBudget: 100130,00€\nVisiteurs: 14\nNombre d'animaux: 1\nNombre d'employés: 0\nNombre d'habitats: 1\n"
+}

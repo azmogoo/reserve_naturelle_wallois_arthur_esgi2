@@ -1,0 +1,1 @@
+{"jour":3,"animaux":[{"nom":"Ricardo ","age":5,"poids":60.0,"taille":195.0,"etatDeSante":"Malade"}],"habitats":[{"nom":"Tourcoing","taille":100000.0,"temperature":28.5,"animaux":[]}],"employes":[],"budget":100860.0,"nombreVisiteurs":68,"rapportJournalier":"=== Jour 3 ===\nBudget: 100860,00€\nVisiteurs: 68\nNombre d'animaux: 1\nNombre d'employés: 0\nNombre d'habitats: 1\n"}

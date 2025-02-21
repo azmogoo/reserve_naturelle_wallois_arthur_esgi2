@@ -1,0 +1,22 @@
+@startuml
+actor Soigneur
+participant "Animal" as A
+participant "Habitat" as H
+
+Soigneur -> H: entrerDansHabitat()
+activate H
+H --> Soigneur: accèsAutorisé
+deactivate H
+
+Soigneur -> A: nourrir()
+activate A
+A -> A: verifierFaim()
+A -> A: manger()
+A --> Soigneur: confirmationRepas
+deactivate A
+
+Soigneur -> H: quitterHabitat()
+activate H
+H --> Soigneur: sortieConfirmée
+deactivate H
+@enduml 

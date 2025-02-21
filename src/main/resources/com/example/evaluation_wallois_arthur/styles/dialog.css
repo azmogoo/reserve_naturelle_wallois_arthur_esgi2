@@ -1,0 +1,39 @@
+.custom-dialog {
+    -fx-background-color: white;
+}
+
+.custom-dialog > *.header-panel {
+    -fx-background-color: #3498db;
+}
+
+.custom-dialog > *.header-panel > *.label {
+    -fx-font-size: 18;
+    -fx-text-fill: white;
+}
+
+.custom-dialog > *.button-bar > *.container {
+    -fx-background-color: white;
+}
+
+.custom-dialog > *.button-bar > *.container > *.button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+}
+
+.custom-dialog > *.button-bar > *.container > *.button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.dialog-field {
+    -fx-pref-width: 300;
+    -fx-padding: 5;
+}
+
+.dialog-label {
+    -fx-font-weight: bold;
+}
+
+.dialog-combobox {
+    -fx-pref-width: 300;
+} 
